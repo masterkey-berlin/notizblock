@@ -35,3 +35,24 @@ Das Dockerfile verwendet ein Multi-Stage Build, um die Anwendung effizient zu co
 - Trennung von Build- und Laufzeitumgebung.
 - Verbesserte Sicherheit und Performance.
 
+## Vite-Konfiguration hinzugefügt
+
+Die vite.config.js wurde eingerichtet, um die Anwendung mit React zu optimieren und Build-Argumente wie VITE_API_URL zu unterstützen.
+
+## Umgebungsvariable für Backend-URL integriert
+
+Die Backend-URL (VITE_API_URL) wird nun während des Builds als Argument injiziert, um dynamische API-URLs zu ermöglichen.
+
+## React-Import und Fehlerbehebung
+
+Fehlende React-Imports wurden hinzugefügt, um Fehler bei der JSX-Verarbeitung zu beheben.
+
+## Dockerfile optimiert
+
+Multi-Stage-Build verbessert, um sicherzustellen, dass nur Produktionsabhängigkeiten und der dist-Ordner im finalen Image enthalten sind.
+
+## Fehlerbehebung bei Frontend-Container
+
+## Browser- und Netzwerk-Debugging durchgeführt
+
+Netzwerk- und Konsolenfehler wurden nicht identifiziert und konnten somit nicht behoben werden.
