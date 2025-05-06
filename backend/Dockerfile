@@ -1,7 +1,16 @@
-FROM node:lts-alpine
+FROM node:22-alpine
+
+# Setze das Arbeitsverzeichnis
 WORKDIR /app
+
+# Kopiere die package.json und package-lock.json
 COPY package*.json ./
-RUN npm install --production
+
+# Installiere die Abhängigkeiten
+RUN npm ci
+
+# Kopiere den gesamten Code ins Image
 COPY . .
-EXPOSE 3000
-CMD ["node", "index.js"]
+
+# Starte die Anwendung
+CMD ["node", "src/server.js"]
