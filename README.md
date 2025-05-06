@@ -55,4 +55,75 @@ Multi-Stage-Build verbessert, um sicherzustellen, dass nur Produktionsabhängigk
 
 ## Browser- und Netzwerk-Debugging durchgeführt
 
-Netzwerk- und Konsolenfehler wurden nicht identifiziert und konnten somit nicht behoben werden.
+Netzwerk- und Konsolenfehler wurden nicht identifiziert und konnten somit nicht behoben werde
+
+1.  ## Projektstruktur beibehalten:** Die bestehende `frontend/` und `backend/` Struktur wurde beibehalten und das Root-Verzeichnis aufgeräumt.
+
+2.  ## Backend-Anpassung für Persistenz:**
+
+    *   Die Node.js/Express API wurde so modifiziert, dass Daten nicht mehr nur im Speicher gehalten werden.
+    *   Das `fs` Modul wird genutzt, um Daten in einer JSON-Datei (`/app/data/items.json` innerhalb des Containers) zu speichern und von dort zu laden.
+    *   Beim Serverstart werden Daten aus der Datei geladen. Existiert die Datei oder das Verzeichnis `/app/data/` nicht, wird es erstellt und mit einem leeren Datensatz initialisiert.
+    *   Bei jeder Datenänderung (POST, DELETE) wird der gesamte Datensatz synchron in die Datei geschrieben.
+3.  ## Dockerisierung:**
+    *   Die Dockerfiles für Frontend und Backend aus der vorherigen Aufgabe wurden beibehalten.
+    *   `.dockerignore` Dateien wurden in den jeweiligen Verzeichnissen und im Root-Verzeichnis überprüft und korrekt konfiguriert.
+4.  **Datenpersistenz mit Docker Volume:**
+    *  ## Ein Benanntes Volume (Named Volume) namens `my-backend-data` wurde gewählt, um das Verzeichnis `/app/data` des Backend-Containers persistent zu machen.
+    *   Dies stellt sicher, dass die Daten auch nach dem Stoppen, Entfernen und Neustarten des Backend-Containers erhalten bleiben.
+5.  ## Container-Management:**
+    *   Das Backend-Image wurde neu gebaut (`my-backend-api:persistence`).
+    *   Der Backend-Container wurde mit dem gemounteten Volume gestartet.
+    *   Das Frontend-Image wurde gebaut und der Container gestartet, wobei die Kommunikation zum Backend über den Host-Port konfiguriert ist.
+6.  ## Persistenztest:**
+    *   Die Funktionalität wurde getestet, indem Daten hinzugefügt, der Backend-Container gestoppt/gestartet und auch entfernt/neu erstellt wurde (unter Wiederverwendung desselben Volumes), um die dauerhafte Speicherung der Daten zu überprüfen.
+
+## Voraussetzungen
+
+*   Docker muss installiert sein.
+
+## Setup und Starten
+
+1.  **Backend bauen und starten:**
+    ```bash
+    cd backend
+    docker build -t my-backend-api:persistence .
+    # Startet den Backend-Container mit einem Named Volume für Persistenz
+    docker run -d -p 8081:3000 --name my-backend-persistent -v my-backend-data:/app/data my-backend-api:persistence
+    cd ..
+    ```
+
+2.  ## Frontend bauen und starten:**
+    ```bash
+    cd frontend
+    docker build --build-arg VITE_API_URL=http://localhost:8081 -t my-frontend-app:latest .
+    docker run -d -p 8080:80 --name my-frontend my-frontend-app:latest
+    cd ..
+    ```
+
+3.  ## Anwendung öffnen:**
+    *   Greife auf das Frontend im Browser zu: `http://localhost:8080`
+    *   Die Backend API ist erreichbar unter: `http://localhost:8081/api/items`
+
+## Persistenz Testen
+
+1.  Füge einige Items über das Frontend (`http://localhost:8080`) hinzu.
+2.  Stoppe den Backend-Container: `docker stop my-backend-persistent`
+3.  Starte den Backend-Container neu: `docker start my-backend-persistent`
+4.  Lade das Frontend neu. Die zuvor hinzugefügten Daten sollten weiterhin vorhanden sein.
+5.  **Optional (robusterer Test):**
+    *   Stoppe und entferne den Backend-Container:
+        ```bash
+        docker stop my-backend-persistent
+        docker rm my-backend-persistent
+        ```
+    *   Starte den Backend-Container erneut mit dem *gleichen* `docker run`-Befehl wie oben (der das Volume `my-backend-data` verwendet).
+    *   Lade das Frontend neu. Die Daten sollten immer noch vorhanden sein, da sie im Volume gespeichert wurden.
+
+## Aufräumen
+
+Um die erstellten Container und das Volume zu entfernen:
+```bash
+docker stop my-frontend my-backend-persistent
+docker rm my-frontend my-backend-persistent
+docker volume rm my-backend-data
