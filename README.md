@@ -127,3 +127,81 @@ Um die erstellten Container und das Volume zu entfernen:
 docker stop my-frontend my-backend-persistent
 docker rm my-frontend my-backend-persistent
 docker volume rm my-backend-data
+
+
+
+2.  Frontend-Codeanpassung:**
+    *   Die API-Aufrufe im React-Code wurden so angepasst, dass sie relativ zum Wert von `VITE_API_URL` erfolgen (z.B. `fetch(\${import.meta.env.VITE_API_URL}/items\`)`).
+    *   Beim Build des Frontend-Containers wird `VITE_API_URL` nun auf einen relativen Pfad wie `/api` gesetzt.
+
+3.  **Nginx Reverse Proxy Konfiguration (Frontend):**
+    *   Eine `nginx.conf` wurde im `frontend/` Verzeichnis erstellt.
+    *   Nginx wurde konfiguriert, um:
+        *   Statische Frontend-Dateien für den Root-Pfad (`/`) auszuliefern.
+        *   Alle Anfragen an den Pfad `/api/` als Reverse Proxy an den Backend-Container (`http://backend-service:3000/`) im Docker-Netzwerk weiterzuleiten.
+    *   Das Frontend-Dockerfile wurde angepasst, um diese `nginx.conf` zu verwenden.
+
+4.  **Docker Netzwerk:**
+    *   Ein dediziertes Docker Bridge Netzwerk namens `my-app-network` wurde erstellt.
+
+5.  **Containerisierte Ausführung im Netzwerk:**
+    *   **Backend:**
+        *   Das Backend-Image (`my-backend-api:network-proxy`) wurde gebaut.
+        *   Der Backend-Container wurde im `my-app-network` mit dem Namen `backend-service` und dem persistenten Volume `my-backend-data` gestartet.
+    *   **Frontend:**
+        *   Das Frontend-Image (`my-frontend-app:network-proxy`) wurde mit `VITE_API_URL=/api` gebaut.
+        *   Der Frontend-Container (`frontend-app`) wurde im `my-app-network` gestartet und Port `8080` des Hosts auf Port `80` des Containers gemappt.
+
+6.  **Testen:**
+    *   Die Anwendung wurde über `http://localhost:8080` aufgerufen.
+    *   Die Kommunikation zwischen Frontend und Backend über den Nginx-Proxy wurde verifiziert.
+    *   Die Datenpersistenz wurde erneut getestet.
+    *   (Optional) Die Netzwerk-Tab-Analyse im Browser zeigte API-Aufrufe an `http://localhost:8080/api/...`.
+
+## Voraussetzungen
+
+*   Docker muss installiert sein.
+
+## Setup und Starten
+
+1.  **Docker Netzwerk erstellen (falls nicht vorhanden):**
+    ```bash
+    docker network create my-app-network
+    ```
+
+2.  **Backend bauen und starten:**
+    ```bash
+    cd backend
+    docker build -t my-backend-api:network-proxy .
+    docker run -d \
+      --name backend-service \
+      --network my-app-network \
+      -v my-backend-data:/app/data \
+      # -p 8081:3000 # Optional für direktes Debugging
+      my-backend-api:network-proxy
+    cd ..
+    ```
+
+3.  **Frontend bauen und starten:**
+    ```bash
+    cd frontend
+    docker build --build-arg VITE_API_URL=/api -t my-frontend-app:network-proxy .
+    docker run -d \
+      --name frontend-app \
+      --network my-app-network \
+      -p 8080:80 \
+      my-frontend-app:network-proxy
+    cd ..
+    ```
+
+4.  **Anwendung öffnen:**
+    *   Greife auf das Frontend im Browser zu: `http://localhost:8080`
+
+## Aufräumen
+
+Um die erstellten Container, das Netzwerk und das Volume zu entfernen:
+```bash
+docker stop frontend-app backend-service
+docker rm frontend-app backend-service
+docker network rm my-app-network
+docker volume rm my-backend-data # Vorsicht, löscht persistente Daten
