@@ -8,7 +8,7 @@ function App() {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetch(`${apiUrl}/api/items`)
+    fetch(`${apiUrl}/items`)
       .then((response) => response.json())
       .then((data) => console.log(data));
   }, [apiUrl]);
