@@ -205,3 +205,11 @@ docker stop frontend-app backend-service
 docker rm frontend-app backend-service
 docker network rm my-app-network
 docker volume rm my-backend-data # Vorsicht, löscht persistente Daten
+
+
+## Datenbank-Schema (Theoretische Ausarbeitung)
+
+    Eine theoretische Ausarbeitung zum Datenbank-Schema (relationale Datenbank mit SQL) für eine Notizblock-Anwendung, inklusive CRUD-Abfragen ist in der Datei [backend/sql-schema.txt] zu finden.
+
+
+

@@ -1,0 +1,181 @@
+1. Kontext wählen
+
+- Datenstruktur: Ich wähle die "Notes" aus der API.
+-Informationen pro Notiz:
+    . id (INTEGER, Primärschlüssel): Eindeutige Identifikation der Notiz.
+    . title (VARCHAR): Der Titel der Notiz.
+    .user_id:(INTEGER): Identifikation des Benutzers, dem die Notiz gehört(für eine eventuelle Benutzererweiterung).
+    .content: Der Inhalt/Text der Notiz.
+    created_at(TIMSTAMP): Zeitstempel der Erstellung.
+    .status(BOOLEAN): Gibt an, ob die Notiz erledigt ist.
+
+2. Datenmodell entwerfen (Schema)
+
+In diesem Fall bietet es sich an, eine Tabelle (notes) und eine für Benutzer (users) zu entwerfen, 
+um eine einfache Beziehung zu demonstrieren.
+
+2.1 Tabelle users:
+    .Name: users
+    .Spalten
+        -user_id:(INTEGER), Primärschlüssel(PK), oft automatisch hochzählend (AUTOINCREMENT oder SERIAL).
+        -username:(VARCHAR 100), Eindeutige (UNIQUE),Nicht leer(NOT NULL).
+        -email:(VARCHAR 255), Eindeutig (UNIQUE), Nicht leer (NOT NULL).
+        -password_hash: (VARCHAR 255), Nicht leer (NOT NULL) (Passwörter sollten nie im Klartext gespeichert werden).
+        -created_at:(TIMESTAMP), Standardwert ist aktueller Zeitstempel (DEFAULT CURRENT_TIMESTAMP) .
+    .Primärschlüssel: user_id.
+    .Begründung: Eine einfache, eindeutige, numerische ID, die von der Datenbank verwaltet wird, ist ideal, um jeden Benutzer eindeutig und effizient zu identifiezieren.
+    Benutzername oder E-Mails könnten sich ändern oder sind für Joins weniger performant.
+
+2. Tabel notes:
+    -Name:notes 
+    -Spalten:
+     .note_id: INTEGER, Primärschlüssel (PK), oft automatisch hochzählend.
+     .user_id: INTEGER, Fremdschlüssel (FK), der auf users (user_id) verweist, NOT NULL.
+     .title: VARCHAR 255, Kann leer sein (NULLABLE) oder Standardwert.
+     .content: TEXT, Kann leer sein (NULLABLE).
+     .created_at: TIMESTAMP, Standardwert ist aktueller Zeitstempel.
+     .update_at: TIMESTAMP, Standardwert ist aktueller Zeitstempel, wird bei Updates aktualisiert (ON UPDATE CURRENT_TIMESTAMP).  
+  .Primärschlüssel: note_id.
+        Begründung: Es handelt sich um eine eindeutige numerische ID für jede Notiz.
+  .Fremdschlüssel: user_id in notes verweist auf user_id in users.
+        -Zweck: Stellt sicher, dass jede Notiz einem existierenden Benutzer zugeordnet ist (referenzielle Integrität).
+        -Beziehung: Modelliert eine "Ein-Benutzer-kann-viele-Notizen-haben"-Beziehung (1:N).
+
+Schritt 3: Grundlegende SQL-Abfragen formulieren (CRUD)
+
+Die Platzhalter ? stehen für Werte, die von der Anwendung bereitgestellt würden.
+
+Für Tabelle users:
+    .CREATE:
+
+    INSERT INTO users (username, email, password_hash, created_at)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP);
+
+    READ (ein Benutzer nach ID):
+
+    SELECT user_id, username, password_hash FROM users WHERE username = ?;
+
+    READ (ein Benutzer nach Username für Login):
+
+    SELECT user_id, username, password_hash FROM users WHERE username = ?;
+
+Für Tabelle notes:
+
+    .CREATE (neue Notiz einfügen):
+
+    INSERT INTO notes (user_id, title, content, created_at, updated_at)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+    .READ:
+
+    SELECT note_id, title, content, created_at, updated_at
+    FROM notes
+    WHERE user_id = ?
+    ORDER BY updated_at DESC;
+
+    .Eine einzelne Notiz basierend auf ihrem Primärschlüssel (und Benutzer_ID für Sicherheit):
+
+    SELECT NOT_ID; title, content, created_at, updated_at 
+    FROM notes
+    WHERE note_id = ? AND user_id = ?;
+
+    .Update( Titel und Inhalt einer spezifischen Notiz ändern):
+
+    UPDATE notes 
+    SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE note_id = ? AND user_id = ?;
+
+    .DELETE (eine spezifische Notiz löschen):
+
+    DELETE FROM notes 
+    WHERE not_id = ? AND user_id = ?;
+
+
+
+
+    # SQL Schema und Abfragen für Notizblock-App
+
+Diese Tabellen beschreiben das entworfene relationale Datenmodell und die grundlegenden SQL-Abfragen für meine Notizblock-Anwendung.
+
+## Datenmodell (Schema)
+
+### Tabelle: `users`
+
+Dient zur Speicherung von Benutzerinformationen.
+
+| Spaltenname   | Datentyp        | Constraints                                     | Beschreibung                               |
+|---------------|-----------------|-------------------------------------------------|--------------------------------------------|
+| `user_id`     | `INTEGER`       | `PRIMARY KEY`, `AUTOINCREMENT` / `SERIAL`       | Eindeutiger Identifikator für den Benutzer |
+| `username`    | `VARCHAR(100)`  | `UNIQUE`, `NOT NULL`                            | Eindeutiger Benutzername                   |
+| `email`       | `VARCHAR(255)`  | `UNIQUE`, `NOT NULL`                            | E-Mail-Adresse des Benutzers               |
+| `password_hash`| `VARCHAR(255)`  | `NOT NULL`                                      | Gehashter Passwort-String                  |
+| `created_at`  | `TIMESTAMP`     | `DEFAULT CURRENT_TIMESTAMP`                     | Zeitstempel der Benutzererstellung         |
+
+
+
+### Tabelle: `notes`
+
+Dient zur Speicherung der eigentlichen Notizen.
+
+| Spaltenname   | Datentyp        | Constraints                                                                 | Beschreibung                               |
+|---------------|-----------------|-----------------------------------------------------------------------------|--------------------------------------------|
+| `note_id`     | `INTEGER`       | `PRIMARY KEY`, `AUTOINCREMENT` / `SERIAL`                                   | Eindeutiger Identifikator für die Notiz    |
+| `user_id`     | `INTEGER`       | `NOT NULL`, `FOREIGN KEY REFERENCES users(user_id) ON DELETE CASCADE`       | ID des Benutzers, dem die Notiz gehört   |
+| `title`       | `VARCHAR(255)`  |                                                                             | Titel der Notiz                            |
+| `content`     | `TEXT`          |                                                                             | Inhalt der Notiz                           |
+| `created_at`  | `TIMESTAMP`     | `DEFAULT CURRENT_TIMESTAMP`                                                 | Zeitstempel der Notizerstellung            |
+| `updated_at`  | `TIMESTAMP`     | `DEFAULT CURRENT_TIMESTAMP`, (oft auch `ON UPDATE CURRENT_TIMESTAMP`)       | Zeitstempel der letzten Aktualisierung     |
+
+**Fremdschlüssel-Beziehung:**
+Die Spalte `user_id` in der Tabelle `notes` ist ein Fremdschlüssel, der auf die Spalte `user_id` in der Tabelle `users` verweist. Dies stellt eine 1:N (Ein-Benutzer-hat-viele-Notizen)-Beziehung her und stellt sicher, dass Notizen nur existierenden Benutzern zugeordnet werden können. `ON DELETE CASCADE` würde bedeuten, dass wenn ein Benutzer gelöscht wird, auch all seine Notizen gelöscht werden.
+
+## SQL-Abfragen (CRUD)
+
+Platzhalter `?` stehen für von der Anwendung bereitgestellte Werte.
+
+### `users` Tabelle
+
+**CREATE (Benutzer erstellen):**
+```sql
+INSERT INTO users (username, email, password_hash, created_at)
+VALUES (?, ?, ?, CURRENT_TIMESTAMP);
+
+
+READ (Benutzer nach ID):
+     SELECT user_id, username, email, created_at FROM users WHERE user_id = ?;
+
+
+READ (Benutezer nach Username für Login):
+    SELECT user_id, username, password_hash FROM users WHERE username = ?;
+
+notes Tabelle
+CREATE (Notiz erstellen):
+
+INSERT INTO notes (user_id, title, content, created_at, updated_at)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+READ (Alle Notizen eines Benutzers):
+
+    SELECT note_id, title, content, created_at, updated_at
+    FROM notes
+    WHERE user_id = ?
+    ORDER BY updated_at DESC;
+
+READ (Einzelne Notiz nach ID und Benutzer-ID):
+
+    SELECT note_id, title, content, created_at, updated_at
+    FROM notes
+    WHERE note_id = ? AND user_id = ?;
+
+UPDATE (Notiz aktualisieren):
+
+    UPDATE notes
+    SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE note_id = ? AND user_id = ?;
+
+DELETE (Notiz löschen):
+
+    DELETE FROM notes
+    WHERE note_id = ? AND user_id = ?;
+
+    
