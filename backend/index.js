@@ -57,6 +57,4 @@ app.delete('/api/items/:id', (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`Backend läuft auf http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

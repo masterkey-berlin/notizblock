@@ -212,4 +212,11 @@ docker volume rm my-backend-data # Vorsicht, löscht persistente Daten
     Eine theoretische Ausarbeitung zum Datenbank-Schema (relationale Datenbank mit SQL) für eine Notizblock-Anwendung, inklusive CRUD-Abfragen ist in der Datei [backend/sql-schema.txt] zu finden.
 
 
+## docker-compose
+## Anwendung starten 
+1. Baue und starte die Anwendung:
+   ```bash
+   docker-compose up --build -d
 
+2. ## Beenden  der Anwendung inklusive Löschen aller Container 
+   docker-compose down 
