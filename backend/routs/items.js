@@ -1,14 +1,37 @@
 import express from "express";
+import { createNote, getAllNotes, deleteNote } from "../services/notesService.js";
+
 const itemsRouter = express.Router();
 
-itemsRouter.get("/", (req, res) => {
-  const items = [
-    { id: 1, name: "Item 1", description: "Description for Item 1" },
-    { id: 2, name: "Item 2", description: "Description for Item 2" },
-    { id: 3, name: "Item 3", description: "Description for Item 3" },
-  ];
+// GET: Alle Items abrufen
+itemsRouter.get("/", async (req, res, next) => {
+    try {
+        const items = await getAllNotes();
+        res.json(items);
+    } catch (err) {
+        next(err);
+    }
+});
 
-  res.json(items);
+// POST: Neues Item hinzufügen
+itemsRouter.post("/", async (req, res, next) => {
+    try {
+        const { name, description } = req.body;
+        const newItem = await createNote(name, description);
+        res.status(201).json(newItem);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// DELETE: Item löschen
+itemsRouter.delete("/:id", async (req, res, next) => {
+    try {
+        await deleteNote(req.params.id);
+        res.status(204).end();
+    } catch (err) {
+        next(err);
+    }
 });
 
 export default itemsRouter;
