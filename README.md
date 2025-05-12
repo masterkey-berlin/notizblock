@@ -219,4 +219,32 @@ docker volume rm my-backend-data # Vorsicht, löscht persistente Daten
    docker-compose up --build -d
 
 2. ## Beenden  der Anwendung inklusive Löschen aller Container 
-   docker-compose down 
+   docker-compose down
+
+## **Datenbank-Integration**
+
+Das Backend ist jetzt mit einer PostgreSQL-Datenbank verbunden. Die Datei-basierte Persistenz wurde durch Datenbank-Persistenz ersetzt. CRUD-Operationen werden über SQL-Abfragen durchgeführt.
+
+### **Manuelle Schema-Erstellung**
+1. Stelle sicher, dass der Datenbank-Container läuft:
+   ```bash
+   docker-compose up -d database
+   ```
+2. Führe die SQL-Datei aus, um das Schema zu erstellen:
+   ```bash
+   docker exec -i database psql -U myuser -d mydatabase < backend/initial_schema.sql
+   ```
+
+### **Stack starten**
+1. Starte den gesamten Stack:
+   ```bash
+   docker-compose up --build -d
+   ```
+2. Greife auf das Frontend zu: [http://localhost:8080](http://localhost:8080).
+
+### **Funktionalität testen**
+- **Items hinzufügen**: Verwende das Frontend oder sende einen POST-Request an `/api/items`.
+- **Items abrufen**: Sende einen GET-Request an `/api/items` oder überprüfe die Datenbank:
+  ```bash
+  docker exec -it database psql -U myuser -d mydatabase -c "SELECT * FROM items;"
+  ```
