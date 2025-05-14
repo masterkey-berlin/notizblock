@@ -27,6 +27,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 // Routes
 app.use("/api/items", itemsRouter);
 

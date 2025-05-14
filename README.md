@@ -248,3 +248,35 @@ Das Backend ist jetzt mit einer PostgreSQL-Datenbank verbunden. Die Datei-basier
   ```bash
   docker exec -it database psql -U myuser -d mydatabase -c "SELECT * FROM items;"
   ```
+
+## Reflexion
+
+### **Prozessbeschreibung**
+Da keine Teamarbeit stattgefunden hat, wurde der gesamte Prozess individuell durchgeführt. Der Fokus lag darauf, die Stabilität des Stacks, die Ende-zu-Ende-Datenbankintegration und die Implementierung der Healthchecks eigenständig sicherzustellen. Dies beinhaltete die Konfiguration der `docker-compose.yml`, die Implementierung der CRUD-Funktionalität und die Überprüfung der Datenbank- und Backend-Integration.
+
+### **Technische Herausforderungen**
+Die größten Herausforderungen waren:
+1. **Datenbankverbindung**: Sicherstellen, dass das Backend korrekt mit der PostgreSQL-Datenbank kommuniziert. Dies wurde durch Debugging der Umgebungsvariablen und Testen der Verbindung mit `pg_isready` gelöst.
+2. **Healthchecks**: Die Konfiguration der Healthchecks für die Datenbank und das Backend, um sicherzustellen, dass die Dienste korrekt starten und verfügbar sind.
+3. **CRUD-Funktionalität**: Die Implementierung der parametrierten Abfragen im Backend, um SQL-Injection zu verhindern.
+
+### **Parametrisierte Abfragen**
+Ein Beispiel für eine parametrisierte Abfrage im Projekt:
+```javascript
+const result = await pool.query("SELECT * FROM items WHERE id = $1", [id]);
+```
+- **Warum notwendig?**: Parametrisierte Abfragen verhindern SQL-Injection, indem Benutzereingaben nicht direkt in die SQL-Statements eingefügt werden.
+
+### **Implementierte Healthchecks**
+- **Datenbank**: Der Healthcheck prüft mit `pg_isready`, ob die PostgreSQL-Datenbank verfügbar ist.
+- **Backend**: Der Healthcheck sendet eine HTTP-Anfrage an `/health`, um sicherzustellen, dass der Server läuft.
+- **Vorteil**: Diese Checks sind aussagekräftiger als nur zu prüfen, ob der Container läuft, da sie die tatsächliche Verfügbarkeit der Dienste testen.
+
+### **Bedeutung von Healthchecks in Kubernetes**
+- **Automatisierung**: Healthchecks ermöglichen es Kubernetes, fehlerhafte Container automatisch neu zu starten.
+- **Zuverlässigkeit**: Sie stellen sicher, dass nur funktionierende Dienste im Cluster verfügbar sind.
+
+### **Stabilität des lokalen Stacks**
+Ein stabiler lokaler Stack mit funktionierender Datenbank-Persistenz und Healthchecks ist entscheidend, um Probleme frühzeitig zu erkennen. Ohne diese Stabilität könnten in Kubernetes folgende Probleme auftreten:
+- **Fehlerhafte Dienste**: Container könnten als "healthy" markiert werden, obwohl sie nicht korrekt funktionieren.
+- **Schwieriges Debugging**: Probleme, die lokal nicht gelöst wurden, würden in der orchestrierten Umgebung schwerer zu beheben sein.

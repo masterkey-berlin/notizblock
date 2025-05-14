@@ -37,23 +37,33 @@ let items = loadData();
 // Middleware
 app.use(express.json());
 
+// Healthcheck-Endpunkt
+app.get("/health", (req, res) => {
+    res.status(200).send("OK");
+});
+
 // API-Endpunkte
 app.get('/api/items', (req, res) => {
-  res.json(items);
+    res.json(items);
 });
 
 app.post('/api/items', (req, res) => {
-  const newItem = req.body;
-  items.push(newItem);
-  saveData(items);
-  res.status(201).json(newItem);
+    const newItem = req.body;
+    items.push(newItem);
+    saveData(items);
+    res.status(201).json(newItem);
 });
 
 app.delete('/api/items/:id', (req, res) => {
-  const id = req.params.id;
-  items = items.filter(item => item.id !== id);
-  saveData(items);
-  res.status(204).send();
+    const id = req.params.id;
+    items = items.filter(item => item.id !== id);
+    saveData(items);
+    res.status(204).send();
+});
+
+// Catch-All-Route
+app.use((req, res) => {
+    res.status(404).json({ error: "Route not found" });
 });
 
 // Start Server

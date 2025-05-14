@@ -13,4 +13,4 @@ RUN npm ci
 COPY . .
 
 # Starte die Anwendung
-CMD ["node", "index.js"]
+CMD ["node", "server.js"]
