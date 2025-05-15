@@ -3,6 +3,7 @@ import cors from "cors";
 import itemsRouter from "./routes/items.js";
 import shutdown from "./utils/shutdown.js";
 import winston from "winston";
+import pool from "./utils/db.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,8 +29,15 @@ app.use((req, res, next) => {
 });
 
 // Health check route
-app.get("/health", (req, res) => {
-  res.status(200).send("OK");
+app.get("/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    logger.info("Health check passed");
+    res.status(200).send({ status: "OK", database: "connected" });
+  } catch (dbError) {
+    logger.error("Health check failed", { error: dbError });
+    res.status(500).send({ status: "ERROR", database: "disconnected", error: dbError.message });
+  }
 });
 
 // Routes

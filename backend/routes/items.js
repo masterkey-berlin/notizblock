@@ -1,5 +1,5 @@
 import express from "express";
-import { createNote, getAllNotes, deleteNote } from "../services/notesService.js";
+import { createNote, getAllNotes, deleteNote, updateNote } from "../services/notesService.js";
 
 const itemsRouter = express.Router();
 
@@ -29,6 +29,29 @@ itemsRouter.delete("/:id", async (req, res, next) => {
     try {
         await deleteNote(req.params.id);
         res.status(204).end();
+    } catch (err) {
+        next(err);
+    }
+});
+
+//Update Function
+itemsRouter.put("/:id", async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, description } = req.body;
+
+        // Überprüfen, ob die ID vorhanden ist
+        if (!id) {
+            return res.status(400).json({ error: "Fehlende ID in der Anfrage" });
+        }
+
+        const updatedItem = await updateNote(id, name, description);
+
+        if (!updatedItem) {
+            return res.status(404).json({ error: "Notiz nicht gefunden" });
+        }
+
+        res.status(200).json(updatedItem);
     } catch (err) {
         next(err);
     }

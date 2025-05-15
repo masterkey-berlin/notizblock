@@ -280,3 +280,64 @@ const result = await pool.query("SELECT * FROM items WHERE id = $1", [id]);
 Ein stabiler lokaler Stack mit funktionierender Datenbank-Persistenz und Healthchecks ist entscheidend, um Probleme frühzeitig zu erkennen. Ohne diese Stabilität könnten in Kubernetes folgende Probleme auftreten:
 - **Fehlerhafte Dienste**: Container könnten als "healthy" markiert werden, obwohl sie nicht korrekt funktionieren.
 - **Schwieriges Debugging**: Probleme, die lokal nicht gelöst wurden, würden in der orchestrierten Umgebung schwerer zu beheben sein.
+
+## Stabilität und Fehlerbehandlung
+
+### Prozess zur Verbesserung der Stabilität und Fehlerbehandlung
+Unser Team hat verschiedene Fehlerfälle simuliert, um die Robustheit des Stacks zu testen. Dazu gehörten:
+- **Datenbank-Ausfall**: Die Datenbank wurde gestoppt und neu gestartet, um sicherzustellen, dass das Backend korrekt darauf reagiert.
+- **Ungültige Anfragen**: Es wurden absichtlich fehlerhafte API-Anfragen gesendet, um die Validierung und Fehlerbehandlung zu testen.
+- **Netzwerkunterbrechungen**: Die Verbindung zwischen Frontend und Backend wurde unterbrochen, um die Reaktion des Frontends zu prüfen.
+
+### Fehlerfall im Backend
+Ein spezifischer Fehlerfall ist der Verlust der Datenbankverbindung. Im Backend wurde dies wie folgt behandelt:
+
+```javascript
+app.use((err, req, res, next) => {
+    if (err.code === 'ECONNREFUSED') {
+        console.error('Datenbankverbindung verloren:', err);
+        res.status(503).json({ error: 'Service Unavailable: Datenbank nicht erreichbar' });
+    } else {
+        console.error('Unbekannter Fehler:', err);
+        res.status(500).json({ error: 'Interner Serverfehler' });
+    }
+});
+```
+- **HTTP-Statuscode 503**: Dieser Code signalisiert, dass der Dienst vorübergehend nicht verfügbar ist, was wichtig ist, um Clients korrekt zu informieren.
+
+### Reaktion des Frontends auf Fehlermeldungen
+Das Frontend zeigt bei Fehlern eine nutzerfreundliche Nachricht an und verhindert Abstürze. Beispiel:
+
+```javascript
+fetch(`${apiUrl}/items`)
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error('Fehler beim Laden der Notizen');
+        }
+        return response.json();
+    })
+    .catch((error) => {
+        console.error('Fehler:', error);
+        alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
+    });
+```
+
+### Nutzung von Healthchecks
+Die implementierten Healthchecks prüfen die Verfügbarkeit der Datenbank und des Backends. Beispiel:
+- **Datenbank-Healthcheck**: `pg_isready` wird verwendet, um die Erreichbarkeit der Datenbank zu prüfen.
+- **Backend-Healthcheck**: Eine Anfrage an `/health` stellt sicher, dass der Server korrekt läuft.
+
+Diese Healthchecks wurden genutzt, um Fehler wie das Stoppen und Starten der Datenbank zu simulieren. Sie sind aussagekräftiger, da sie die tatsächliche Verfügbarkeit der Dienste testen.
+
+### Logging zur Fehleranalyse
+Gezieltes Logging half, Stabilitätsprobleme zu identifizieren. Beispiel:
+```javascript
+console.error('Datenbankverbindung verloren:', err);
+```
+Diese Nachricht zeigte, dass die Datenbank nicht erreichbar war, und half, den Fehler schnell zu beheben.
+
+### Bedeutung der heutigen Arbeit
+Die Arbeit an Stabilität, Fehlerbehandlung und Healthchecks ist unerlässlich, um Risiken wie fehlerhafte Dienste oder schweres Debugging in produktiven Umgebungen zu reduzieren. Sie stellt sicher, dass die Anwendung robust und zuverlässig ist, bevor sie auf Plattformen wie Kubernetes ausgerollt wird.
+
+### Bedeutung von sauberem Code
+Eine klare Code-Struktur und das Entfernen von Altlasten erleichtern das Debugging und die Wartbarkeit, insbesondere bei komplexen Fehlerfällen. Dies ist entscheidend für die Zusammenarbeit im Team und die langfristige Stabilität der Anwendung.
