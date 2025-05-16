@@ -31,11 +31,12 @@ app.use((req, res, next) => {
 // Health check route
 app.get("/health", async (req, res) => {
   try {
+    logger.info("Performing health check...");
     await pool.query("SELECT 1");
     logger.info("Health check passed");
     res.status(200).send({ status: "OK", database: "connected" });
-  } catch (dbError) {
-    logger.error("Health check failed", { error: dbError });
+  } catch (error) {
+    logger.error("Health check failed", { error: error });
     res.status(500).send({ status: "ERROR", database: "disconnected", error: dbError.message });
   }
 });
