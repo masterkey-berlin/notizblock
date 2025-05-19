@@ -341,3 +341,44 @@ Die Arbeit an Stabilität, Fehlerbehandlung und Healthchecks ist unerlässlich, 
 
 ### Bedeutung von sauberem Code
 Eine klare Code-Struktur und das Entfernen von Altlasten erleichtern das Debugging und die Wartbarkeit, insbesondere bei komplexen Fehlerfällen. Dies ist entscheidend für die Zusammenarbeit im Team und die langfristige Stabilität der Anwendung.
+
+
+# Notizblock - Docker Swarm Deployment
+
+## Aktueller Zustand
+Der Notizblock-Stack ist eine robuste Fullstack-Anwendung, bereit für die Orchestrierung auf Docker Swarm. Die Dienste (Frontend, Backend, Datenbank) sind erfolgreich auf spezifischen Nodes mit Node-Platzierung deployed:
+- **Frontend**: Läuft auf `worker1`
+- **Backend**: Läuft auf `worker2`
+- **Datenbank**: Läuft auf `worker3`
+
+## Einrichtung des Docker Swarm Clusters
+1. **VMs erstellen**:
+   - Erstelle 4 VMs (1 Manager, 3 Worker) mit Multipass oder einer anderen Virtualisierungssoftware.
+2. **Swarm initialisieren**:
+   - Auf dem Manager:
+     ```bash
+     docker swarm init
+     ```
+   - Auf den Workern:
+     ```bash
+     docker swarm join --token <TOKEN> <MANAGER-IP>:2377
+     ```
+3. **Nodes labeln**:
+   - Auf dem Manager:
+     ```bash
+     docker node update --label-add role=frontend worker1
+     docker node update --label-add role=backend worker2
+     docker node update --label-add role=database worker3
+     ```
+
+## Deployment des Stacks
+1. **Stack deployen**:
+   - Kopiere die [docker-stack.yml](http://_vscodecontentref_/0) auf den Manager und deploye den Stack:
+     ```bash
+     docker stack deploy -c docker-stack.yml notizapp
+     ```
+
+## Verifizierung der Bereitstellung
+1. **Dienste prüfen**:
+   ```bash
+   docker stack services notizapp
