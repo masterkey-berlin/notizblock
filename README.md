@@ -341,3 +341,53 @@ Die Arbeit an Stabilität, Fehlerbehandlung und Healthchecks ist unerlässlich, 
 
 ### Bedeutung von sauberem Code
 Eine klare Code-Struktur und das Entfernen von Altlasten erleichtern das Debugging und die Wartbarkeit, insbesondere bei komplexen Fehlerfällen. Dies ist entscheidend für die Zusammenarbeit im Team und die langfristige Stabilität der Anwendung.
+
+
+# Notizblock
+
+Ein einfacher Notizblock, der mit React erstellt wurde. Die Anwendung wurde erfolgreich auf Docker Swarm mit node-spezifischer Platzierung deployed.
+
+---
+
+## Zustand des Stacks
+
+Der Stack ist robust und erfolgreich auf Docker Swarm bereitgestellt. Die Platzierung der Services erfolgt node-spezifisch, um eine optimale Verteilung zu gewährleisten. Healthchecks und Logs wurden implementiert, um die Stabilität und Verfügbarkeit zu überwachen.
+
+---
+
+## Einrichtung des Swarm-Clusters
+
+### 1. VMs erstellen
+Erstelle die benötigten VMs (z. B. mit Multipass):
+```bash
+multipass launch --name manager
+multipass launch --name worker1
+multipass launch --name worker2
+multipass launch --name worker3
+
+multipass shell manager
+docker swarm init --advertise-addr <manager-ip>
+
+multipass shell worker1
+docker swarm join --token <TOKEN> <manager-ip>:2377
+
+docker node update --label-add role=database worker3
+docker node update --label-add role=backend worker1
+docker node update --label-add role=frontend worker2
+
+docker build -t <registry>/notizapp-backend ./backend
+docker build -t <registry>/notizapp-frontend ./frontend
+docker push <registry>/notizapp-backend
+docker push <registry>/notizapp-frontend
+
+docker stack deploy --compose-file [docker-stack.yml](http://_vscodecontentref_/1) notizapp
+
+docker stack services notizapp
+docker service ps notizapp_database
+docker service ps notizapp_backend
+docker service ps notizapp_frontend
+
+docker service logs notizapp_database
+docker service logs notizapp_backend
+docker service logs notizapp_frontend
+

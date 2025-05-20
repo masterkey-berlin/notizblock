@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: mydatabase
     volumes:
       - my-db-data:/var/lib/postgresql/data
-      - ./backend/initial_schema.sql:/docker-entrypoint-initdb.d/intidb.sql:ro
+      - initial_db_schema:/docker-entrypoint-initdb.d/  # Initialisierungsskript
     expose:
       - "5432"
     healthcheck:
@@ -16,6 +16,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app_net
 
   backend:
     build:
@@ -37,6 +39,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - app_net
 
   frontend:
     build:
@@ -48,6 +52,13 @@ services:
       - "8080:80"
     depends_on:
       - backend
+    networks:
+      - app_net
 
 volumes:
   my-db-data:
+  initial_db_schema:  # Volume für die Initialisierung der Datenbank
+
+networks:
+  app_net:
+    driver: overlay
