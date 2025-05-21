@@ -32,7 +32,6 @@ Kernidee der deklarativen Philosophie von Kubernetes:
 -Kubernetes verwaltet den gewünschten Zustand  (z.B. Anzahl der Pods) und 
 paßt den aktuellen Zustand automatisch an. 
 
-![alt text](<Screenshot (3839).png>)
-![alt text](<Screenshot (3840)-1.png>)
-![alt text](<Screenshot (3841).png>)
+![alt text](<Screenshot 2025-05-21 214939.png>)
+![alt text](<Screenshot 2025-05-21 214953.png>)
 
