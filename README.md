@@ -341,3 +341,17 @@ Die Arbeit an Stabilität, Fehlerbehandlung und Healthchecks ist unerlässlich, 
 
 ### Bedeutung von sauberem Code
 Eine klare Code-Struktur und das Entfernen von Altlasten erleichtern das Debugging und die Wartbarkeit, insbesondere bei komplexen Fehlerfällen. Dies ist entscheidend für die Zusammenarbeit im Team und die langfristige Stabilität der Anwendung.
+
+
+## Kubernetes Einführung
+
+Die Aufgabe zur Einrichtung eines lokalen Kubernetes Clusters und Reflexion befindet sich im Ordner [kubernetes/](kubernetes/).
+
+### Lernziele
+- Einrichtung eines lokalen Kubernetes Clusters.
+- Verständnis der Control Plane und Worker Nodes.
+- Nutzung von `kubectl` zur Interaktion mit dem Cluster.
+
+## speicherot 
+
+Die Reflexionsfragen und Antworten liegen im k8s-intro-reflection.md file im root-ordner des Stacks.
