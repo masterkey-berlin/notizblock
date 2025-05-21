@@ -355,3 +355,4 @@ Die Aufgabe zur Einrichtung eines lokalen Kubernetes Clusters und Reflexion befi
 ## speicherot 
 
 Die Reflexionsfragen und Antworten liegen im k8s-intro-reflection.md file im root-ordner des Stacks.
+Das Cluster wurde aufgrund von technischen Problemen mit Docker-Desktop mit minikube erstellt. 
