@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "my-notizblock-app-chart.fullname" . }}-backend
+  labels:
+    app: another-helm-release-my-notizblock-app-chart-backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "my-notizblock-app-chart.fullname" . }}-backend
+  template:
+    metadata:
+      labels:
+        app: {{ include "my-notizblock-app-chart.fullname" . }}-backend
+    spec:
+      containers:
+      - name: backend
+        image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+        env:
+        - name: DB_HOST
+          value: "{{ .Release.Name }}-database"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "my-notizblock-app-chart.fullname" . }}-db-secret
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "my-notizblock-app-chart.fullname" . }}-db-secret
+              key: password
+        - name: DB_NAME
+          value: "{{ .Values.database.name }}"
+        ports:
+        - containerPort: 3000

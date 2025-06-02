@@ -1,0 +1,12 @@
+apiVersion: v2
+name: my-notizblock-app-chart
+description: A Helm chart for my Full-Stack Application
+type: application
+version: 0.1.0 # Version deines Charts
+appVersion: "1.0.0" # Version deiner Anwendung
+
+dependencies:
+  - name: postgresql
+    version: "16.7.8" # WICHTIG: Wähle eine aktuelle, stabile Version von Bitnami!
+    repository: "https://charts.bitnami.com/bitnami"
+    alias: database # Alias für den Service-Namen und die Konfiguration in values.yaml

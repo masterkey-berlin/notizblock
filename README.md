@@ -356,3 +356,97 @@ Die Aufgabe zur Einrichtung eines lokalen Kubernetes Clusters und Reflexion befi
 
 Die Reflexionsfragen und Antworten liegen im k8s-intro-reflection.md file im root-ordner des Stacks.
 Das Cluster wurde aufgrund von technischen Problemen mit Docker-Desktop mit minikube erstellt. 
+
+## Wichtige Hinweise zu Passwörtern
+
+**Sicherheitswarnung:** Passwörter und sensible Daten sollten niemals in die `values.yaml` eingecheckt werden, insbesondere in öffentlichen Repositories.
+
+### Empfohlene Vorgehensweise:
+1. **Passwörter über die Kommandozeile setzen:**
+   ```bash
+   helm install my-release ./my-notizblock-app-chart --set database.password=YOUR_PASSWORD
+
+
+   # Notizblock Helm Chart
+
+Ein Helm Chart zur Bereitstellung einer containerisierten Notizblock-Anwendung mit Frontend, Backend und PostgreSQL-Datenbank in Kubernetes.
+
+## Komponenten
+- **Frontend:** React-Anwendung, bereitgestellt über NGINX.
+- **Backend:** Node.js/Express-API mit PostgreSQL-Integration.
+- **Datenbank:** PostgreSQL mit persistentem Speicher.
+
+## Features
+- **Ingress:** Zugriff über `my-app.local`.
+- **Konfigurierbare Umgebungsvariablen:** Backend-URL und Datenbankzugang.
+- **Datenpersistenz:** PostgreSQL mit Kubernetes-Secrets.
+
+## Installation
+1. **Hosts-Datei anpassen:**
+   ```plaintext
+   127.0.0.1 my-app.local
+
+   helm install my-release ./my-notizblock-app-chart --namespace default \
+     --set database.password=YOUR_PASSWORD
+
+     helm install my-release ./my-notizblock-app-chart --namespace default -f values-secret.yaml
+
+     helm upgrade my-release ./my-notizblock-app-chart --namespace default -f values-secret.yaml
+
+     helm uninstall my-release --namespace default
+
+     oder 
+
+     kubectl delete secret -n default -l name=my-release
+
+     ## Best Practices für values.yaml
+
+1. **Keine sensiblen Daten speichern:**
+   - Passwörter, API-Schlüssel und andere sensible Informationen sollten nicht direkt in der `values.yaml` gespeichert werden.
+   - Verwende stattdessen Kubernetes-Secrets oder setze Werte zur Laufzeit mit `--set`.
+
+2. **Strukturierte Werte verwenden:**
+   - Organisiere die Werte in logischen Abschnitten (z. B. `frontend`, `backend`, `database`), um die Übersichtlichkeit zu erhöhen.
+
+3. **Standardwerte bereitstellen:**
+   - Definiere sinnvolle Standardwerte, um die Nutzung des Charts zu vereinfachen.
+
+4. **Kommentare hinzufügen:**
+   - Dokumentiere die Bedeutung der Werte direkt in der `values.yaml`, um die Konfiguration verständlicher zu machen.
+
+---
+
+## Anleitung: PostgreSQL Subchart einfügen
+
+1. **Subchart hinzufügen:**
+   - Füge das PostgreSQL-Chart als Abhängigkeit in die Datei `Chart.yaml` ein:
+     ```yaml
+     dependencies:
+     - name: postgresql
+       version: 16.7.8
+       repository: https://charts.bitnami.com/bitnami
+     ```
+
+2. **Abhängigkeiten aktualisieren:**
+   - Lade die Abhängigkeiten mit Helm:
+     ```bash
+     helm dependency update ./my-notizblock-app-chart
+     ```
+
+3. **Konfiguration anpassen:**
+   - Passe die PostgreSQL-Einstellungen in der `values.yaml` an:
+     ```yaml
+     postgresql:
+       auth:
+         username: myuser
+         password: mypassword
+         database: mydatabase
+     ```
+
+4. **Chart installieren:**
+   - Installiere das Chart mit den angepassten Werten:
+     ```bash
+     helm install my-release ./my-notizblock-app-chart --namespace default
+     ```
+
+     ![alt text](<Screenshot 2025-06-02 101626.png>) ![alt text](<Screenshot 2025-06-02 102837 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 102837.png>) ![alt text](<Screenshot 2025-06-02 122956 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 122956.png>) ![alt text](<Screenshot 2025-06-02 123434 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 123434.png>) ![alt text](<Screenshot 2025-06-02 125111 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 125111.png>) ![alt text](<Screenshot 2025-06-02 125352 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 125352.png>) ![alt text](<Screenshot 2025-06-02 125400 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 125400.png>) ![alt text](<Screenshot 2025-06-02 125758 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 125758.png>) ![alt text](<Screenshot 2025-06-02 130507 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 130507.png>) ![alt text](<Screenshot 2025-06-02 130514 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 130514.png>) ![alt text](<Screenshot 2025-06-02 130527 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 130527.png>) ![alt text](<Screenshot 2025-06-02 133727 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 133727.png>) ![alt text](<Screenshot 2025-06-02 133845 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 133845.png>) ![alt text](<Screenshot 2025-06-02 141615 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 141615.png>) ![alt text](<Screenshot 2025-06-02 142428 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 142428.png>) ![alt text](<Screenshot 2025-06-02 142437 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 142437.png>) ![alt text](<Screenshot 2025-06-02 142857 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 142857.png>) ![alt text](<Screenshot 2025-06-02 144823 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 144823.png>) ![alt text](<Screenshot 2025-06-02 144833 - Kopie.png>) ![alt text](<Screenshot 2025-06-02 144833.png>) ![alt text](<Screenshot 2025-06-02 144845.png>) ![alt text](<Screenshot 2025-06-02 144857.png>) ![alt text](<Screenshot 2025-06-02 144907.png>) ![alt text](<Screenshot 2025-06-02 144916.png>) ![alt text](<Screenshot 2025-06-02 144926.png>) ![alt text](<Screenshot 2025-06-02 144936.png>) ![alt text](<Screenshot 2025-06-02 144946.png>) ![alt text](<Screenshot 2025-06-02 144955.png>) ![alt text](<Screenshot 2025-06-02 145005.png>) ![alt text](<Screenshot 2025-06-02 145013.png>) ![alt text](<Screenshot 2025-06-02 145021.png>) ![alt text](<Screenshot 2025-06-02 145027.png>) ![alt text](<Screenshot 2025-06-02 154151.png>) ![alt text](<Screenshot 2025-06-02 154524.png>) ![alt text](<Screenshot 2025-06-02 154608.png>) ![alt text](<Screenshot 2025-06-02 154735.png>) ![alt text](<Screenshot 2025-06-02 155328.png>) ![alt text](<Screenshot 2025-06-02 160418.png>) ![alt text](<Screenshot 2025-06-02 160500.png>) ![alt text](<Screenshot 2025-06-02 160537.png>) ![alt text](<Screenshot 2025-06-02 160937.png>) ![alt text](<Screenshot 2025-06-02 163344.png>)

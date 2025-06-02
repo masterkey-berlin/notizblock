@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Helm Charts
+my-notizblock-app-chart/values-secret.yaml
+

@@ -1,0 +1,2 @@
+metadata:
+  name: {{ include "my-notizblock-app-chart.fullname" . }}-database

@@ -1,0 +1,31 @@
+frontend:
+  image:
+    repository: "masterkey75/notizblock-frontend"
+    tag: "latest" # Stelle sicher, dass dieser Wert vorhanden ist
+  replicaCount: 2
+  service:
+    targetPort: 80
+  env:
+    BACKEND_URL: "http://another-helm-release-my-notizblock-app-chart-backend.default.svc.cluster.local:3000"
+
+backend:
+  replicaCount: 2
+  image:
+    repository: "masterkey75/notizblock-backend"
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+
+database:
+  username: "myuser"
+  password: "mypassword"
+  name: "mydatabase"
+  fullnameOverride: "new-helm-release-database"
+
+ingress:
+  enabled: true
+  host: "my-app.local"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
